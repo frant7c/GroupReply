@@ -19,21 +19,33 @@ public class SendService extends Service {
 
     @Override
     public void onCreate() {
+        super.onCreate();
         service_started = true;
-        Log.i("LBL", "onCreate.....");
+        Log.i("LBL", "SendService onCreate");
     }
 
     @Override
     public int onStartCommand(android.content.Intent intent, int flags, int startId) {
-        Log.i("LBL", "Start.....");
+        Log.i("LBL", "SendService Start");
         int i;
-        ArrayList<String> send_list = (ArrayList<String>) intent.getSerializableExtra("sendlist");
+        String address;
+
+        ArrayList<String> send_list = (ArrayList<String>) intent.getSerializableExtra("send_list");
         String sms = intent.getStringExtra("sms");
-        String address = send_list.get(send_count++);
+
         SmsManager mSmsManager = SmsManager.getDefault();
-        PendingIntent mPendingIntent = PendingIntent.getActivity(this, 0, new Intent(), 0);
+        PendingIntent mSendPI = PendingIntent.getActivity(this, 0, new Intent(), 0);
         for (i = 0; i < 1; i++) {
-            //mSmsManager.sendTextMessage(address, null, sms, mPendingIntent, null);
+            address = send_list.get(send_count++);
+            Intent mDeliverIntent = new Intent("DELIVERED_SMS_ACTION");
+            //Log.i("LBL", "" + mDeliverIntent.hashCode());
+            mDeliverIntent.putExtra("address", address);
+            mDeliverIntent.putExtra("date", System.currentTimeMillis());
+            mDeliverIntent.putExtra("body", sms);
+            PendingIntent mDeliverPI = PendingIntent.getBroadcast(this, 0,
+                    mDeliverIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+            mSmsManager.sendTextMessage(address, null, sms, mSendPI, mDeliverPI);
             Log.i("LBL", "Sending " + address);
             //Add sent message into database
             /*ContentValues values = new ContentValues();
@@ -63,6 +75,6 @@ public class SendService extends Service {
     public void onDestroy() {
         super.onDestroy();
         service_started = false;
-        Log.i("LBL", "onDestroy.....");
+        Log.i("LBL", "SendService onDestroy");
     }
 }

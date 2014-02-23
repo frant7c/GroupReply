@@ -49,7 +49,7 @@ class ConversationListAdapter extends BaseAdapter {
     private LayoutInflater mInflater;
     HashMap<Integer,View> hmListViewMap;
     String[] postion_array;
-    static HashMap<String, Boolean> mapSendList = new HashMap<String, Boolean>();
+    static HashMap<String, Boolean> send_map = new HashMap<String, Boolean>();
 
     class ViewHolder{
         TextView tvName = null;
@@ -105,10 +105,10 @@ class ConversationListAdapter extends BaseAdapter {
                                              boolean isChecked) {
                     if(isChecked){
                         vhHolder.ckbCheck.setChecked(true);
-                        mapSendList.put(cvConversation.strAddress, false);
+                        send_map.put(cvConversation.strAddress, false);
                         Log.i("LBL", position + " has been checked!");
                     }else{
-                        mapSendList.remove(cvConversation.strAddress);
+                        send_map.remove(cvConversation.strAddress);
                         vhHolder.ckbCheck.setChecked(false);
                         Log.i("LBL", position + " has been unchecked!");
                     }
@@ -279,11 +279,7 @@ public class MainActivity extends Activity {
                             .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    Intent mIntent = new Intent(MainActivity.this, SendService.class);
-                                    PendingIntent mPendingIntent = PendingIntent.getService(MainActivity.this, 0,
-                                            mIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                                    mAlarmManager.cancel(mPendingIntent);
-                                    stopService(mIntent);
+
                                     if (sendSMS() == 0) {
                                         new AlertDialog.Builder(MainActivity.this)
                                                 .setTitle("正在发送")
@@ -298,6 +294,7 @@ public class MainActivity extends Activity {
                             .create()
                             .show();
                 } else {
+
                     if (sendSMS() == 0) {
                         new AlertDialog.Builder(MainActivity.this)
                                 .setTitle("正在发送")
@@ -312,7 +309,7 @@ public class MainActivity extends Activity {
     }
 
     private int sendSMS() {
-        if (ConversationListAdapter.mapSendList.size() == 0) {
+        if (ConversationListAdapter.send_map.size() == 0) {
             Toast.makeText(MainActivity.this,
                     "请选择收信人。",
                     Toast.LENGTH_SHORT).show();
@@ -329,27 +326,44 @@ public class MainActivity extends Activity {
             return -2;
         }
 
+        if (SendService.service_started) {
+            Intent mSendIntent = new Intent(MainActivity.this, SendService.class);
+            PendingIntent mPendingIntent = PendingIntent.getService(MainActivity.this, 0,
+                    mSendIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            mAlarmManager.cancel(mPendingIntent);
+            stopService(mSendIntent);
+        }
+
+        if (DeliveryService.service_started) {
+            Intent mDeliveryIntent = new Intent(MainActivity.this, DeliveryService.class);
+            stopService(mDeliveryIntent);
+        }
+
         mAlarmManager = (AlarmManager) MainActivity.this
                 .getSystemService(MainActivity.ALARM_SERVICE);
 
         //包装需要执行Service的Intent
-        Intent intent = new Intent(MainActivity.this, SendService.class);
-        ArrayList<String> sendlist = new ArrayList<String>();
-        for(String strAddress : ConversationListAdapter.mapSendList.keySet()){
-            sendlist.add(strAddress);
+        Intent mSendIntent = new Intent(MainActivity.this, SendService.class);
+        ArrayList<String> send_list = new ArrayList<String>();
+        for(String strAddress : ConversationListAdapter.send_map.keySet()){
+            send_list.add(strAddress);
         }
 
-        intent.putExtra("sendlist", sendlist);
-        intent.putExtra("sms", strSMS);
+        mSendIntent.putExtra("send_list", send_list);
+        mSendIntent.putExtra("sms", strSMS);
         PendingIntent pendingIntent = PendingIntent.getService(MainActivity.this, 0,
-                intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                mSendIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         //触发服务的起始时间
         long triggerAtTime = SystemClock.elapsedRealtime();
 
         //使用AlarmManger的setRepeating方法设置定期执行的时间间隔（seconds秒）和需要执行的Service
         mAlarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtTime,
-                30 * 1000, pendingIntent);
+                20 * 1000, pendingIntent);
+
+        Intent mDeliveryIntent = new Intent(MainActivity.this, DeliveryService.class);
+        mDeliveryIntent.putExtra("send_list_size", ConversationListAdapter.send_map.size());
+        startService(mDeliveryIntent);
 
         etEditText1.setText("");
         return 0;
@@ -380,7 +394,7 @@ public class MainActivity extends Activity {
     public void onDestroy()
     {
         super.onDestroy();
-        ConversationListAdapter.mapSendList.clear();
+        ConversationListAdapter.send_map.clear();
         Log.i("LBL", "-------onDestroy------");
     }
 

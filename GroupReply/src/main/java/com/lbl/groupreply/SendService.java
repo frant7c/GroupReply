@@ -34,18 +34,23 @@ public class SendService extends Service {
         String sms = intent.getStringExtra("sms");
 
         SmsManager mSmsManager = SmsManager.getDefault();
-        PendingIntent mSendPI = PendingIntent.getActivity(this, 0, new Intent(), 0);
+        //PendingIntent mSendPI = PendingIntent.getActivity(this, 0, new Intent(), 0);
         for (i = 0; i < 1; i++) {
             address = send_list.get(send_count++);
-            Intent mDeliverIntent = new Intent("DELIVERED_SMS_ACTION");
-            //Log.i("LBL", "" + mDeliverIntent.hashCode());
-            mDeliverIntent.putExtra("address", address);
-            mDeliverIntent.putExtra("date", System.currentTimeMillis());
-            mDeliverIntent.putExtra("body", sms);
-            PendingIntent mDeliverPI = PendingIntent.getBroadcast(this, 0,
-                    mDeliverIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+            ArrayList<String> messageArray = mSmsManager.divideMessage(sms);
+            ArrayList<PendingIntent> mDeliverIntents = new ArrayList<PendingIntent>();
+            for (int j = 0; j < messageArray.size(); j++) {
+                Intent mDeliverIntent = new Intent("DELIVERED_SMS_ACTION");
+                //Log.i("LBL", "" + mDeliverIntent.hashCode());
+                mDeliverIntent.putExtra("address", address);
+                mDeliverIntent.putExtra("date", System.currentTimeMillis());
+                mDeliverIntent.putExtra("body", sms);
+                PendingIntent mDeliverPI = PendingIntent.getBroadcast(this, 0,
+                        mDeliverIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                mDeliverIntents.add(mDeliverPI);
+            }
 
-            mSmsManager.sendTextMessage(address, null, sms, mSendPI, mDeliverPI);
+            mSmsManager.sendMultipartTextMessage(address, null, messageArray, null, mDeliverIntents);
             Log.i("LBL", "Sending " + address);
             //Add sent message into database
             /*ContentValues values = new ContentValues();

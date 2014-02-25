@@ -49,7 +49,7 @@ class ConversationListAdapter extends BaseAdapter {
     private LayoutInflater mInflater;
     HashMap<Integer,View> hmListViewMap;
     String[] postion_array;
-    static HashMap<String, Boolean> send_map = new HashMap<String, Boolean>();
+    static HashMap<String, Boolean> send_map = new HashMap<String, Boolean>(64);
 
     class ViewHolder{
         TextView tvName = null;
@@ -61,7 +61,7 @@ class ConversationListAdapter extends BaseAdapter {
                                    Context context){
         mapItems = mapConversations;
         mInflater = LayoutInflater.from(context);
-        hmListViewMap = new HashMap<Integer,View>();
+        hmListViewMap = new HashMap<Integer,View>(128);
         postion_array = position;
     }
 
@@ -136,13 +136,13 @@ public class MainActivity extends Activity {
     private HashMap<String, Conversation> getSmsInPhone() {
         final String SMS_URI_ALL = "content://sms/";
         //final String SMS_URI_INBOX = "content://sms/inbox";
-        mapConversations = new HashMap<String, Conversation>();
+        mapConversations = new HashMap<String, Conversation>(128);
         position = new String[500];
         Cursor cursor;
         int iCount = 0;
 
         Uri uri = Uri.parse(SMS_URI_ALL);
-        String[] projection = new String[] { "_id", "address", "person", "body", "date", "type" };
+        String[] projection = new String[] {"address", "body", "date", "type"};
         cursor = getContentResolver().query(uri, projection, null, null, "date desc");
         if (cursor != null) {
             dumpNumber();
@@ -218,7 +218,7 @@ public class MainActivity extends Activity {
         Cursor cursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
         String strName;
         String strNumber;
-        mapNum2Name = new HashMap<String, String>();
+        mapNum2Name = new HashMap<String, String>(128);
         try {
             if(cursor != null && cursor.moveToFirst()){
                 int intNameIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
@@ -344,7 +344,7 @@ public class MainActivity extends Activity {
 
         //包装需要执行Service的Intent
         Intent mSendIntent = new Intent(MainActivity.this, SendService.class);
-        ArrayList<String> send_list = new ArrayList<String>();
+        ArrayList<String> send_list = new ArrayList<String>(64);
         for(String strAddress : ConversationListAdapter.send_map.keySet()){
             send_list.add(strAddress);
         }
@@ -359,7 +359,7 @@ public class MainActivity extends Activity {
 
         //使用AlarmManger的setRepeating方法设置定期执行的时间间隔（seconds秒）和需要执行的Service
         mAlarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtTime,
-                20 * 1000, pendingIntent);
+                600 * 1000, pendingIntent);
 
         Intent mDeliveryIntent = new Intent(MainActivity.this, DeliveryService.class);
         mDeliveryIntent.putExtra("send_list_size", ConversationListAdapter.send_map.size());

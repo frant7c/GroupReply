@@ -36,15 +36,27 @@ public class SendService extends Service {
         SmsManager mSmsManager = SmsManager.getDefault();
         //PendingIntent mSendPI = PendingIntent.getActivity(this, 0, new Intent(), 0);
         for (i = 0; i < 1; i++) {
+            long date = System.currentTimeMillis();
             address = send_list.get(send_count++);
+
+            //Add sent message into database
+            ContentValues values = new ContentValues();
+            values.put("date", date);
+            values.put("read", 0);
+            values.put("type", 2);
+            values.put("address", address);
+            values.put("body", sms);
+            Uri uri = getContentResolver().insert(Uri.parse("content://sms/sent"), values);
+
             ArrayList<String> messageArray = mSmsManager.divideMessage(sms);
             ArrayList<PendingIntent> mDeliverIntents = new ArrayList<PendingIntent>();
             for (int j = 0; j < messageArray.size(); j++) {
                 Intent mDeliverIntent = new Intent("DELIVERED_SMS_ACTION");
                 //Log.i("LBL", "" + mDeliverIntent.hashCode());
                 mDeliverIntent.putExtra("address", address);
-                mDeliverIntent.putExtra("date", System.currentTimeMillis());
+                mDeliverIntent.putExtra("date", date);
                 mDeliverIntent.putExtra("body", sms);
+                mDeliverIntent.putExtra("uri", uri.toString());
                 PendingIntent mDeliverPI = PendingIntent.getBroadcast(this, 0,
                         mDeliverIntent, PendingIntent.FLAG_CANCEL_CURRENT);
                 mDeliverIntents.add(mDeliverPI);
@@ -52,14 +64,8 @@ public class SendService extends Service {
 
             mSmsManager.sendMultipartTextMessage(address, null, messageArray, null, mDeliverIntents);
             Log.i("LBL", "Sending " + address);
-            //Add sent message into database
-            /*ContentValues values = new ContentValues();
-            values.put("date", System.currentTimeMillis());
-            values.put("read", 0);
-            values.put("type", 2);
-            values.put("address", address);
-            values.put("body", sms);
-            getContentResolver().insert(Uri.parse("content://sms/sent"), values);*/
+
+            Log.i("LBL", uri.toString());
         }
 
         if (send_count == send_list.size()) {

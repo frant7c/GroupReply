@@ -37,6 +37,9 @@ public class DeliveryService extends Service {
                 String address = intent.getStringExtra("address");
                 String sms = intent.getStringExtra("body");
                 long date = intent.getLongExtra("date", 0);
+                String str_uri = intent.getStringExtra("uri");
+                Uri uri = Uri.parse(str_uri);
+                getContentResolver().delete(uri, "*", null);
                 ContentValues values = new ContentValues();
                 values.put("date", date);
                 values.put("read", 0);
@@ -46,7 +49,8 @@ public class DeliveryService extends Service {
                 values.put("body", sms);
                 getContentResolver().insert(Uri.parse("content://sms/sent"), values);
                 receiveCount++;
-                Log.i("LBL", "onReceive intent = " + intent.hashCode() + " context = " + context + " address = " + address);
+                Log.i("LBL", "onReceive intent = " + intent.hashCode() + " context = " + context + " address = " + address
+                    + "uri = " + uri.toString());
 
                 if (receiveCount >= sendListSize) {
                     stopSelf();

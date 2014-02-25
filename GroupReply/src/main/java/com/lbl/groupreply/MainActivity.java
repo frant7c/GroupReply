@@ -274,32 +274,32 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 if (SendService.service_started) {
                     new AlertDialog.Builder(MainActivity.this)
-                            .setTitle("确认重发")
+                            .setTitle(getString(R.string.confirm_resend))
                             .setMessage("eggbht")
-                            .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                            .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
 
                                     if (sendSMS() == 0) {
                                         new AlertDialog.Builder(MainActivity.this)
-                                                .setTitle("正在发送")
+                                                .setTitle(getString(R.string.sending))
                                                 .setMessage("fdfdsf")
-                                                .setPositiveButton("确定", null)
+                                                .setPositiveButton(getString(R.string.ok), null)
                                                 .create()
                                                 .show();
                                     }
                                 }
                             })
-                            .setNegativeButton("Cancel", null)
+                            .setNegativeButton(getString(R.string.cancel), null)
                             .create()
                             .show();
                 } else {
 
                     if (sendSMS() == 0) {
                         new AlertDialog.Builder(MainActivity.this)
-                                .setTitle("正在发送")
+                                .setTitle(getString(R.string.sending))
                                 .setMessage("fdfdsf")
-                                .setPositiveButton("确定", null)
+                                .setPositiveButton(getString(R.string.ok), null)
                                 .create()
                                 .show();
                     }
@@ -311,7 +311,7 @@ public class MainActivity extends Activity {
     private int sendSMS() {
         if (ConversationListAdapter.send_map.size() == 0) {
             Toast.makeText(MainActivity.this,
-                    "请选择收信人。",
+                    getString(R.string.need_selection),
                     Toast.LENGTH_SHORT).show();
             return -1;
         }
@@ -321,7 +321,7 @@ public class MainActivity extends Activity {
 
         if(strSMS.equals("")){
             Toast.makeText(MainActivity.this,
-                    "请输入短信内容。",
+                    getString(R.string.need_input),
                     Toast.LENGTH_SHORT).show();
             return -2;
         }

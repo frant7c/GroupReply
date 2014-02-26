@@ -9,8 +9,8 @@
         android:layout_height="wrap_content"
         android:layout_toLeftOf="@+id/checkBox1"
         android:paddingLeft="10dp"
-        android:textColor="#f0f"
-        android:textSize="20sp" />
+        android:textColor="#000000"
+        android:textSize="21sp" />
 
     <TextView
         android:id="@+id/textView2"

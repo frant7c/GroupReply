@@ -35,9 +35,9 @@ public class SendService extends Service {
 
         SmsManager mSmsManager = SmsManager.getDefault();
         //PendingIntent mSendPI = PendingIntent.getActivity(this, 0, new Intent(), 0);
-        for (i = 0; i < 1; i++) {
+        for (i = 0; i < 20; i++) {
             long date = System.currentTimeMillis();
-            address = send_list.get(send_count++);
+            address = send_list.get(send_count);
 
             //Add sent message into database
             ContentValues values = new ContentValues();
@@ -62,18 +62,18 @@ public class SendService extends Service {
                 mDeliverIntents.add(mDeliverPI);
             }
 
-            mSmsManager.sendMultipartTextMessage(address, null, messageArray, null, mDeliverIntents);
+            //mSmsManager.sendMultipartTextMessage(address, null, messageArray, null, mDeliverIntents);
             Log.i("LBL", "Sending " + address);
 
-            Log.i("LBL", uri.toString());
+            if (++send_count == send_list.size()) {
+                PendingIntent pendingIntent = PendingIntent.getService(this, 0,
+                        intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                MainActivity.mAlarmManager.cancel(pendingIntent);
+                stopSelf();
+                return START_NOT_STICKY;
+            }
         }
 
-        if (send_count == send_list.size()) {
-            PendingIntent pendingIntent = PendingIntent.getService(this, 0,
-                    intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            MainActivity.mAlarmManager.cancel(pendingIntent);
-            stopSelf();
-        }
         return START_STICKY;
     }
 

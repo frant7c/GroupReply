@@ -149,14 +149,14 @@ public class MainActivity extends Activity {
             try {
                 if(cursor.moveToFirst()) {
                     //int index_Address = cursor.getColumnIndex("address");
-                    int index_Address = 1;
+                    int index_Address = 0;
                     //int index_Person = cursor.getColumnIndex("person");
                     //int index_Body = cursor.getColumnIndex("body");
-                    int index_Body = 3;
+                    int index_Body = 1;
                     //int index_type = cursor.getColumnIndex("type");
-                    int index_type = 5;
+                    int index_type = 3;
                     //int index_Date = cursor.getColumnIndex("date");
-                    int index_Date = 4;
+                    int index_Date = 2;
                     //Log.i("LBL", "" + index_Date);
                     do{
                         String strAddress = handleNumber(cursor.getString(index_Address));
@@ -272,10 +272,19 @@ public class MainActivity extends Activity {
         btnButton1.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
+                final int estimate_time;
+                final int send_map_size = ConversationListAdapter.send_map.size();
+                if ((send_map_size % 20) == 0) {
+                    estimate_time = (send_map_size / 20) * 10;
+                } else if (send_map_size < 20) {
+                    estimate_time = 10;
+                } else {
+                    estimate_time = (send_map_size / 20) * 10 + 10;
+                }
                 if (SendService.service_started) {
                     new AlertDialog.Builder(MainActivity.this)
-                            .setTitle(getString(R.string.confirm_resend))
-                            .setMessage("eggbht")
+                            .setTitle(getString(R.string.confirm_resend_title))
+                            .setMessage(getString(R.string.confirm_resend_message))
                             .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
@@ -283,7 +292,9 @@ public class MainActivity extends Activity {
                                     if (sendSMS() == 0) {
                                         new AlertDialog.Builder(MainActivity.this)
                                                 .setTitle(getString(R.string.sending))
-                                                .setMessage("fdfdsf")
+                                                .setMessage(String.format(getString(R.string.send_message),
+                                                        send_map_size,
+                                                        estimate_time))
                                                 .setPositiveButton(getString(R.string.ok), null)
                                                 .create()
                                                 .show();
@@ -298,7 +309,9 @@ public class MainActivity extends Activity {
                     if (sendSMS() == 0) {
                         new AlertDialog.Builder(MainActivity.this)
                                 .setTitle(getString(R.string.sending))
-                                .setMessage("fdfdsf")
+                                .setMessage(String.format(getString(R.string.send_message),
+                                        send_map_size,
+                                        estimate_time))
                                 .setPositiveButton(getString(R.string.ok), null)
                                 .create()
                                 .show();

@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">GroupReply</string>
-    <string name="action_settings">Settings</string>
+    <string name="app_name">短信群回</string>
+    <string name="about">关于</string>
+
     <drawable name="white">#ffffffff</drawable>
+
     <string name="send">发送</string>
     <string name="need_input">请输入短信内容</string>
     <string name="need_selection">请选择收信人</string>
@@ -13,5 +15,9 @@
     <string name="confirm_resend_title">确认重发</string>
     <string name="confirm_resend_message">程序正在后台发送短信，确认取消并按新的选择发送吗？</string>
     <string name="send_message">为避免运营商当做垃圾短信屏蔽，我们采取每10分钟发送20条短信的策略。您已选择发送%1$d条短信，预计需要%2$d分钟</string>
+    <string name="title_activity_activity_about">关于</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="input_hint">输入信息</string>
 
 </resources>

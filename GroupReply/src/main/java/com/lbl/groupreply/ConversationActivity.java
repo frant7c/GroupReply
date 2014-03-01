@@ -8,11 +8,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.CheckBox;
 import android.widget.TextView;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -57,7 +55,7 @@ class SMSListAdapter extends BaseAdapter {
         final ViewHolder vhHolder;
         if (hmListViewMap.get(i) == null) {
             SMS mSms = mList.get(i);
-            if (mSms.intType == 1) {
+            if (mSms.type == 1) {
                 vView1 = mInflater.inflate(R.layout.sms_from_you, null);
             } else {
                 vView1 = mInflater.inflate(R.layout.sms_from_me, null);
@@ -66,7 +64,7 @@ class SMSListAdapter extends BaseAdapter {
             vhHolder.mSMS = (TextView) vView1.findViewById(R.id.textView);
             vhHolder.mDate = (TextView) vView1.findViewById(R.id.textView2);
             hmListViewMap.put(i, vView1);
-            vhHolder.mSMS.setText(mSms.strBody);
+            vhHolder.mSMS.setText(mSms.smsBody);
             DateFormat mDateFormat = DateFormat.getDateTimeInstance();
             Date d = new Date(mSms.time);
             String strDate = mDateFormat.format(d);

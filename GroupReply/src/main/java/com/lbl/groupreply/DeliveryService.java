@@ -10,8 +10,6 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.util.Log;
 
-import java.util.HashMap;
-
 public class DeliveryService extends Service {
     public static boolean service_started = false;
     private BroadcastReceiver mDeliveryBroadcastReceiver;

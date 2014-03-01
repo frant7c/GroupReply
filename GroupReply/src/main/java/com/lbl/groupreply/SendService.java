@@ -31,6 +31,7 @@ public class SendService extends Service {
         String address;
 
         ArrayList<String> send_list = (ArrayList<String>) intent.getSerializableExtra("send_list");
+
         String sms = intent.getStringExtra("sms");
 
         SmsManager mSmsManager = SmsManager.getDefault();
@@ -50,7 +51,8 @@ public class SendService extends Service {
 
             ArrayList<String> messageArray = mSmsManager.divideMessage(sms);
             ArrayList<PendingIntent> mDeliverIntents = new ArrayList<PendingIntent>();
-            for (int j = 0; j < messageArray.size(); j++) {
+            int size = messageArray.size();
+            for (int j = 0; j < size; j++) {
                 Intent mDeliverIntent = new Intent("DELIVERED_SMS_ACTION");
                 //Log.i("LBL", "" + mDeliverIntent.hashCode());
                 mDeliverIntent.putExtra("address", address);
@@ -62,7 +64,7 @@ public class SendService extends Service {
                 mDeliverIntents.add(mDeliverPI);
             }
 
-            //mSmsManager.sendMultipartTextMessage(address, null, messageArray, null, mDeliverIntents);
+            mSmsManager.sendMultipartTextMessage(address, null, messageArray, null, mDeliverIntents);
             Log.i("LBL", "Sending " + address);
 
             if (++send_count == send_list.size()) {

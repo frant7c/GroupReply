@@ -15,6 +15,7 @@ import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -23,6 +24,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,47 +34,47 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 class SMS implements Serializable {
-    int intType = -1;
+    int type = -1;
     long time = 0;
-    String strBody = null;
+    String smsBody = null;
 }
 
 class Conversation{
-    String strName = null;
-    String strLatestSMS = null;
-    String strAddress = null;
-    ArrayList<SMS> lstSMSList;
+    String name = null;
+    String latestSMS = null;
+    String address = null;
+    ArrayList<SMS> smsArrayList;
 }
 
 class ConversationListAdapter extends BaseAdapter {
-    private HashMap<String, Conversation> mapItems;
+    private HashMap<String, Conversation> mItemsMap;
     private LayoutInflater mInflater;
-    HashMap<Integer,View> hmListViewMap;
-    String[] postion_array;
-    static HashMap<String, Boolean> send_map = new HashMap<String, Boolean>(64);
+    HashMap<Integer,View> mListViewMap;
+    String[] positionArray;
+    static HashMap<String, Boolean> mSendMap = new HashMap<String, Boolean>(64);
 
     class ViewHolder{
-        TextView tvName = null;
-        TextView tvSMS = null;
-        CheckBox ckbCheck = null;
+        TextView mName = null;
+        TextView mSMS = null;
+        CheckBox mCheck = null;
     }
 
     public ConversationListAdapter(HashMap<String, Conversation> mapConversations, String[] position,
                                    Context context){
-        mapItems = mapConversations;
+        mItemsMap = mapConversations;
         mInflater = LayoutInflater.from(context);
-        hmListViewMap = new HashMap<Integer,View>(128);
-        postion_array = position;
+        mListViewMap = new HashMap<Integer,View>(64);
+        positionArray = position;
     }
 
     @Override
     public int getCount() {
-        return mapItems.size();
+        return mItemsMap.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return mapItems.get(postion_array[position]);
+        return mItemsMap.get(positionArray[position]);
     }
 
     @Override
@@ -82,64 +84,64 @@ class ConversationListAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        View vView1;
-        final ViewHolder vhHolder;
+        View mView1;
+        final ViewHolder mHolder;
 
         //Log.i("LBL", "" + intCount++);
-        if (hmListViewMap.get(position) == null) {
-            vView1 = mInflater.inflate(R.layout.relative, null);
-            vhHolder = new ViewHolder();
-            assert vView1 != null;
-            vhHolder.tvName = (TextView) vView1.findViewById(R.id.textView1);
-            vhHolder.tvSMS = (TextView) vView1.findViewById(R.id.textView2);
-            vhHolder.ckbCheck = (CheckBox) vView1.findViewById(R.id.checkBox1);
-            hmListViewMap.put(position, vView1);
-            final Conversation cvConversation = mapItems.get(postion_array[position]);
-            vhHolder.tvName.setText(cvConversation.strName);
-            vhHolder.tvSMS.setText(cvConversation.strLatestSMS);
+        if (mListViewMap.get(position) == null) {
+            mView1 = mInflater.inflate(R.layout.conversation_item, null);
+            mHolder = new ViewHolder();
+            assert mView1 != null;
+            mHolder.mName = (TextView) mView1.findViewById(R.id.textView1);
+            mHolder.mSMS = (TextView) mView1.findViewById(R.id.textView2);
+            mHolder.mCheck = (CheckBox) mView1.findViewById(R.id.checkBox1);
+            mListViewMap.put(position, mView1);
+            final Conversation mConversation = mItemsMap.get(positionArray[position]);
+            mHolder.mName.setText(mConversation.name);
+            mHolder.mSMS.setText(mConversation.latestSMS);
 
-            vhHolder.ckbCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
+            mHolder.mCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView,
                                              boolean isChecked) {
-                    if(isChecked){
-                        vhHolder.ckbCheck.setChecked(true);
-                        send_map.put(cvConversation.strAddress, false);
+                    if (isChecked) {
+                        mHolder.mCheck.setChecked(true);
+                        mSendMap.put(mConversation.address, false);
                         Log.i("LBL", position + " has been checked!");
-                    }else{
-                        send_map.remove(cvConversation.strAddress);
-                        vhHolder.ckbCheck.setChecked(false);
+                    } else {
+                        mSendMap.remove(mConversation.address);
+                        mHolder.mCheck.setChecked(false);
                         Log.i("LBL", position + " has been unchecked!");
                     }
                 }
 
             });
-            vView1.setTag(vhHolder);
+            mView1.setTag(mHolder);
         }else{
-            vView1 = hmListViewMap.get(position);
+            mView1 = mListViewMap.get(position);
         }
 
-        return vView1;
+        return mView1;
     }
 
 }
 
 public class MainActivity extends Activity {
     public static AlarmManager mAlarmManager;
-    String[] position;
-    HashMap<String, Conversation> mapConversations;
+    String[] positionArray;
+    HashMap<String, Conversation> mConversationsMap;
     Conversation mConversation;
     SMS mSMS;
-    HashMap<String, String> mapNum2Name;
+    HashMap<String, String> mNum2NameMap;
 
     private HashMap<String, Conversation> getSmsInPhone() {
         final String SMS_URI_ALL = "content://sms/";
         //final String SMS_URI_INBOX = "content://sms/inbox";
-        mapConversations = new HashMap<String, Conversation>(128);
-        position = new String[500];
+        mConversationsMap = new HashMap<String, Conversation>(128);
+        positionArray = new String[500];
         Cursor cursor;
-        int iCount = 0;
+        int count = 0;
 
         Uri uri = Uri.parse(SMS_URI_ALL);
         String[] projection = new String[] {"address", "body", "date", "type"};
@@ -159,38 +161,38 @@ public class MainActivity extends Activity {
                     int index_Date = 2;
                     //Log.i("LBL", "" + index_Date);
                     do{
-                        String strAddress = handleNumber(cursor.getString(index_Address));
-                        if (strAddress == null) {
+                        String address = handleNumber(cursor.getString(index_Address));
+                        if (address == null) {
                             continue;
                         }
-                        String strName;
-                        String strBody = cursor.getString(index_Body);
-                        int intType = cursor.getInt(index_type);
-                        long longDate = cursor.getLong(index_Date);
-                        strName = mapNum2Name.get(strAddress);
-                        if(strName == null){
-                            strName = strAddress;
+                        String name;
+                        String smsBody = cursor.getString(index_Body);
+                        int type = cursor.getInt(index_type);
+                        long date = cursor.getLong(index_Date);
+                        name = mNum2NameMap.get(address);
+                        if(name == null){
+                            name = address;
                         }
-                        if(!mapConversations.containsKey(strName)){
+                        if(!mConversationsMap.containsKey(name)){
                             mConversation = new Conversation();
-                            mConversation.strName = strName;
-                            mConversation.strLatestSMS = strBody;
-                            mConversation.strAddress = strAddress;
-                            mConversation.lstSMSList = new ArrayList<SMS>();
+                            mConversation.name = name;
+                            mConversation.latestSMS = smsBody;
+                            mConversation.address = address;
+                            mConversation.smsArrayList = new ArrayList<SMS>();
                             mSMS = new SMS();
-                            mSMS.strBody = strBody;
-                            mSMS.intType = intType;
-                            mSMS.time = longDate;
-                            mConversation.lstSMSList.add(mSMS);
-                            mapConversations.put(strName, mConversation);
-                            position[iCount++] = strName;
+                            mSMS.smsBody = smsBody;
+                            mSMS.type = type;
+                            mSMS.time = date;
+                            mConversation.smsArrayList.add(mSMS);
+                            mConversationsMap.put(name, mConversation);
+                            positionArray[count++] = name;
                         } else {
-                            mConversation = mapConversations.get(strName);
+                            mConversation = mConversationsMap.get(name);
                             mSMS = new SMS();
-                            mSMS.strBody = strBody;
-                            mSMS.intType = intType;
-                            mSMS.time = longDate;
-                            mConversation.lstSMSList.add(mSMS);
+                            mSMS.smsBody = smsBody;
+                            mSMS.type = type;
+                            mSMS.time = date;
+                            mConversation.smsArrayList.add(mSMS);
                         }
                     }while (cursor.moveToNext());
                 }
@@ -198,12 +200,12 @@ public class MainActivity extends Activity {
                 cursor.close();
             }
         }
-        return mapConversations;
+        return mConversationsMap;
     }
 
-    private String handleNumber(String strNum){
+    private String handleNumber(String num){
         String tmp;
-        tmp = strNum.replace(" ", "");
+        tmp = num.replace(" ", "");
         if(tmp.charAt(0) == '+') {
             if (tmp.charAt(1) != '8' || tmp.charAt(2) != '6') {
                 return null;
@@ -214,22 +216,21 @@ public class MainActivity extends Activity {
     }
 
     private void dumpNumber(){
-        assert ContactsContract.CommonDataKinds.Phone.CONTENT_URI != null;
         Cursor cursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
-        String strName;
-        String strNumber;
-        mapNum2Name = new HashMap<String, String>(128);
+        String name;
+        String number;
+        mNum2NameMap = new HashMap<String, String>(128);
         try {
             if(cursor != null && cursor.moveToFirst()){
-                int intNameIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
-                int intNumIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                int nameIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+                int numIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
                 do{
-                    strName = cursor.getString(intNameIndex);
-                    strNumber = handleNumber(cursor.getString(intNumIndex));
-                    if (strNumber == null) {
+                    name = cursor.getString(nameIndex);
+                    number = handleNumber(cursor.getString(numIndex));
+                    if (number == null) {
                         continue;
                     }
-                    mapNum2Name.put(strNumber, strName);
+                    mNum2NameMap.put(number, name);
                 }while(cursor.moveToNext());
             }
         } finally {
@@ -243,37 +244,42 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        long startTime = System.nanoTime();
-        final HashMap<String, Conversation> mapConversations = getSmsInPhone();
-        long consumingTime = System.nanoTime() - startTime;
-        Log.i("LBL", "Used " + consumingTime/1000 + "us");
+        final HashMap<String, Conversation> mConversationsMap = getSmsInPhone();
 
-        ConversationListAdapter myListAdapter = new ConversationListAdapter(mapConversations, position,
+        ConversationListAdapter mListAdapter = new ConversationListAdapter(mConversationsMap, positionArray,
                 this);
-        ListView myList = (ListView)findViewById(R.id.mylist);
-        myList.setAdapter(myListAdapter);
-        myList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        ListView mConversationListView = (ListView)findViewById(R.id.conversations);
+        mConversationListView.setAdapter(mListAdapter);
+        mConversationListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Log.i("LBL", i + " has been selected!");
-                Conversation cvConversation = mapConversations.get(position[i]);
-                /*for (SMS sms : cvConversation.lstSMSList) {
-                    Log.i("LBL", sms.intType + " " + sms.strBody);
-                }*/
+                Conversation mConversation = mConversationsMap.get(positionArray[i]);
                 Intent mIntent = new Intent(MainActivity.this, ConversationActivity.class);
                 Bundle mData = new Bundle();
-                mData.putSerializable("smslist", cvConversation.lstSMSList);
+                mData.putSerializable("smslist", mConversation.smsArrayList);
                 mIntent.putExtras(mData);
                 startActivity(mIntent);
             }
         });
 
-        Button btnButton1 = (Button)findViewById(R.id.button1);
+        final EditText etEditText1 = (EditText)findViewById(R.id.editText1);
+        etEditText1.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                String text = etEditText1.getText().toString();
+                if (text.equals(getString(R.string.input_hint)) && b) {
+                    etEditText1.setText("");
+                }
+            }
+        });
+
+        ImageButton btnButton1 = (ImageButton)findViewById(R.id.button1);
         btnButton1.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
                 final int estimate_time;
-                final int send_map_size = ConversationListAdapter.send_map.size();
+                final int send_map_size = ConversationListAdapter.mSendMap.size();
                 if ((send_map_size % 20) == 0) {
                     estimate_time = (send_map_size / 20) * 10;
                 } else if (send_map_size < 20) {
@@ -322,7 +328,7 @@ public class MainActivity extends Activity {
     }
 
     private int sendSMS() {
-        if (ConversationListAdapter.send_map.size() == 0) {
+        if (ConversationListAdapter.mSendMap.size() == 0) {
             Toast.makeText(MainActivity.this,
                     getString(R.string.need_selection),
                     Toast.LENGTH_SHORT).show();
@@ -358,7 +364,7 @@ public class MainActivity extends Activity {
         //包装需要执行Service的Intent
         Intent mSendIntent = new Intent(MainActivity.this, SendService.class);
         ArrayList<String> send_list = new ArrayList<String>(64);
-        for(String strAddress : ConversationListAdapter.send_map.keySet()){
+        for(String strAddress : ConversationListAdapter.mSendMap.keySet()){
             send_list.add(strAddress);
         }
 
@@ -375,7 +381,7 @@ public class MainActivity extends Activity {
                 600 * 1000, pendingIntent);
 
         Intent mDeliveryIntent = new Intent(MainActivity.this, DeliveryService.class);
-        mDeliveryIntent.putExtra("send_list_size", ConversationListAdapter.send_map.size());
+        mDeliveryIntent.putExtra("send_list_size", ConversationListAdapter.mSendMap.size());
         startService(mDeliveryIntent);
 
         etEditText1.setText("");
@@ -407,7 +413,7 @@ public class MainActivity extends Activity {
     public void onDestroy()
     {
         super.onDestroy();
-        ConversationListAdapter.send_map.clear();
+        ConversationListAdapter.mSendMap.clear();
         Log.i("LBL", "-------onDestroy------");
     }
 
@@ -415,6 +421,17 @@ public class MainActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        switch (menuItem.getItemId()) {
+            case R.id.about:
+                Intent mIntent = new Intent(MainActivity.this, ActivityAbout.class);
+                startActivity(mIntent);
+                break;
+        }
         return true;
     }
 }

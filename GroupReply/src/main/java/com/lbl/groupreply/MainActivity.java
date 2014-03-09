@@ -274,7 +274,7 @@ public class MainActivity extends Activity {
             }
         });
 
-        ImageButton btnButton1 = (ImageButton)findViewById(R.id.button1);
+        Button btnButton1 = (Button)findViewById(R.id.button1);
         btnButton1.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -296,14 +296,23 @@ public class MainActivity extends Activity {
                                 public void onClick(DialogInterface dialogInterface, int i) {
 
                                     if (sendSMS() == 0) {
-                                        new AlertDialog.Builder(MainActivity.this)
-                                                .setTitle(getString(R.string.sending))
-                                                .setMessage(String.format(getString(R.string.send_message),
-                                                        send_map_size,
-                                                        estimate_time))
-                                                .setPositiveButton(getString(R.string.ok), null)
-                                                .create()
-                                                .show();
+                                        if (send_map_size > 20) {
+                                            new AlertDialog.Builder(MainActivity.this)
+                                                    .setTitle(getString(R.string.sending))
+                                                    .setMessage(String.format(getString(R.string.send_message),
+                                                            send_map_size,
+                                                            estimate_time))
+                                                    .setPositiveButton(getString(R.string.ok), null)
+                                                    .create()
+                                                    .show();
+                                        } else {
+                                            new AlertDialog.Builder(MainActivity.this)
+                                                    .setTitle(getString(R.string.sending))
+                                                    .setMessage(getString(R.string.successful_send))
+                                                    .setPositiveButton(getString(R.string.ok), null)
+                                                    .create()
+                                                    .show();
+                                        }
                                     }
                                 }
                             })
@@ -313,14 +322,23 @@ public class MainActivity extends Activity {
                 } else {
 
                     if (sendSMS() == 0) {
-                        new AlertDialog.Builder(MainActivity.this)
-                                .setTitle(getString(R.string.sending))
-                                .setMessage(String.format(getString(R.string.send_message),
-                                        send_map_size,
-                                        estimate_time))
-                                .setPositiveButton(getString(R.string.ok), null)
-                                .create()
-                                .show();
+                        if (send_map_size > 20) {
+                            new AlertDialog.Builder(MainActivity.this)
+                                    .setTitle(getString(R.string.sending))
+                                    .setMessage(String.format(getString(R.string.send_message),
+                                            send_map_size,
+                                            estimate_time))
+                                    .setPositiveButton(getString(R.string.ok), null)
+                                    .create()
+                                    .show();
+                        } else {
+                            new AlertDialog.Builder(MainActivity.this)
+                                    .setTitle(getString(R.string.sending))
+                                    .setMessage(getString(R.string.successful_send))
+                                    .setPositiveButton(getString(R.string.ok), null)
+                                    .create()
+                                    .show();
+                        }
                     }
                 }
             }
@@ -421,7 +439,7 @@ public class MainActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
-        return true;
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override

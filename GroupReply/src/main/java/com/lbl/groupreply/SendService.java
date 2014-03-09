@@ -50,8 +50,22 @@ public class SendService extends Service {
             Uri uri = getContentResolver().insert(Uri.parse("content://sms/sent"), values);
 
             ArrayList<String> messageArray = mSmsManager.divideMessage(sms);
-            ArrayList<PendingIntent> mDeliverIntents = new ArrayList<PendingIntent>();
+
+            ArrayList<PendingIntent> mSendIntents = new ArrayList<PendingIntent>();
             int size = messageArray.size();
+            for (int j = 0; j < size; j++) {
+                Intent mSendIntent = new Intent("SEND_SMS_ACTION");
+                //Log.i("LBL", "" + mDeliverIntent.hashCode());
+                mSendIntent.putExtra("address", address);
+                mSendIntent.putExtra("date", date);
+                mSendIntent.putExtra("body", sms);
+                mSendIntent.putExtra("uri", uri.toString());
+                PendingIntent mSendPI = PendingIntent.getBroadcast(this, 0,
+                        mSendIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                mSendIntents.add(mSendPI);
+            }
+
+            ArrayList<PendingIntent> mDeliverIntents = new ArrayList<PendingIntent>();
             for (int j = 0; j < size; j++) {
                 Intent mDeliverIntent = new Intent("DELIVERED_SMS_ACTION");
                 //Log.i("LBL", "" + mDeliverIntent.hashCode());
@@ -64,7 +78,7 @@ public class SendService extends Service {
                 mDeliverIntents.add(mDeliverPI);
             }
 
-            mSmsManager.sendMultipartTextMessage(address, null, messageArray, null, mDeliverIntents);
+            mSmsManager.sendMultipartTextMessage(address, null, messageArray, mSendIntents, mDeliverIntents);
             Log.i("LBL", "Sending " + address);
 
             if (++send_count == send_list.size()) {

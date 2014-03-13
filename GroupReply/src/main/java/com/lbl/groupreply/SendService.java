@@ -81,7 +81,11 @@ public class SendService extends Service {
 
             //mSmsManager.sendMultipartTextMessage(address, null, messageArray, mSendIntents, mDeliverIntents);
             Log.i("LBL", "Sending " + address);
-            MainActivity.mProgressDialog1.setProgress(++send_count);
+            send_count++;
+            if (MainActivity.mProgressDialog1 != null) {
+                MainActivity.mProgressDialog1.setProgress(send_count);
+            }
+
             if (send_count == send_list.size()) {
                 PendingIntent pendingIntent = PendingIntent.getService(this, 0,
                         intent, PendingIntent.FLAG_UPDATE_CURRENT);

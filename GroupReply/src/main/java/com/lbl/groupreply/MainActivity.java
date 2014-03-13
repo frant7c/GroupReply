@@ -284,48 +284,61 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 final int estimate_time;
                 final int send_map_size = ConversationListAdapter.mSendMap.size();
-                if ((send_map_size % 20) == 0) {
-                    estimate_time = (send_map_size / 20) * 10;
-                } else if (send_map_size < 20) {
-                    estimate_time = 10;
-                } else {
-                    estimate_time = (send_map_size / 20) * 10 + 10;
-                }
+
+
                 if (!SendService.service_started) {
                     if (sendSMS() == 0) {
                         if (send_map_size > 10) {
+                            mProgressDialog1 = new ProgressDialog(MainActivity.this);
                             mProgressDialog1.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                            mProgressDialog1.setTitle(getString(R.string.sending));
+                            if ((send_map_size % 10) == 0) {
+                                estimate_time = (send_map_size / 10) * 5;
+                            } else {
+                                estimate_time = (send_map_size / 10) * 5 + 5;
+                            }
+                            mProgressDialog1.setMessage(String.format(getString(R.string.send_message),
+                                    send_map_size,
+                                    estimate_time));
                             mProgressDialog1.setIndeterminate(false);
                             mProgressDialog1.setCancelable(false);
                             mProgressDialog1.setMax(send_map_size);
-                            mProgressDialog1.setButton(BUTTON_POSITIVE, "ok", new DialogInterface.OnClickListener() {
+                            mProgressDialog1.setButton(BUTTON_POSITIVE, getString(R.string.ok), new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
+                                    if (mProgressDialog1.getProgress() == send_map_size) {
+                                        mProgressDialog1.cancel();
+                                    }
+                                }
+                            });
+                            mProgressDialog1.setButton(BUTTON_NEGATIVE, getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    if (mProgressDialog1.getProgress() < send_map_size) {
+                                        new AlertDialog.Builder(MainActivity.this)
+                                                .setTitle(getString(R.string.confirm_resend_title))
+                                                .setMessage(getString(R.string.confirm_resend_message))
+                                                .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                                        cancelSending();
+                                                    }
+                                                })
+                                                .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                                        mProgressDialog1.show();
+                                                    }
+                                                })
+                                                .create()
+                                                .show();
+                                    } else {
+                                        mProgressDialog1.cancel();
+                                    }
 
                                 }
                             });
-                            mProgressDialog1.setButton(BUTTON_NEGATIVE, "cancel", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    new AlertDialog.Builder(MainActivity.this)
-                                            .setTitle("sure?")
-                                            .setMessage("are you sure?")
-                                            .setPositiveButton("yes", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialogInterface, int i) {
-                                                    cancelSending();
-                                                }
-                                            })
-                                            .setNegativeButton("no", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialogInterface, int i) {
-                                                    mProgressDialog1.show();
-                                                }
-                                            })
-                                            .create()
-                                            .show();
-                                }
-                            });
+                            mProgressDialog1.show();
                         } else {
                             new AlertDialog.Builder(MainActivity.this)
                                     .setTitle(getString(R.string.sending))

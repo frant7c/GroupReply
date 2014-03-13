@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -31,6 +32,9 @@ import android.widget.Toast;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import static android.content.DialogInterface.BUTTON_NEGATIVE;
+import static android.content.DialogInterface.BUTTON_POSITIVE;
 
 class SMS implements Serializable {
     int type = -1;
@@ -128,6 +132,7 @@ class ConversationListAdapter extends BaseAdapter {
 
 public class MainActivity extends Activity {
     public static AlarmManager mAlarmManager;
+    public static ProgressDialog mProgressDialog1;
     String[] positionArray;
     HashMap<String, Conversation> mConversationsMap;
     Conversation mConversation;
@@ -273,8 +278,8 @@ public class MainActivity extends Activity {
             }
         });
 
-        Button btnButton1 = (Button)findViewById(R.id.button1);
-        btnButton1.setOnClickListener(new View.OnClickListener(){
+        Button mButton1 = (Button)findViewById(R.id.button1);
+        mButton1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 final int estimate_time;
@@ -286,7 +291,57 @@ public class MainActivity extends Activity {
                 } else {
                     estimate_time = (send_map_size / 20) * 10 + 10;
                 }
-                if (SendService.service_started) {
+                if (!SendService.service_started) {
+                    if (sendSMS() == 0) {
+                        if (send_map_size > 10) {
+                            mProgressDialog1.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                            mProgressDialog1.setIndeterminate(false);
+                            mProgressDialog1.setCancelable(false);
+                            mProgressDialog1.setMax(send_map_size);
+                            mProgressDialog1.setButton(BUTTON_POSITIVE, "ok", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+
+                                }
+                            });
+                            mProgressDialog1.setButton(BUTTON_NEGATIVE, "cancel", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    new AlertDialog.Builder(MainActivity.this)
+                                            .setTitle("sure?")
+                                            .setMessage("are you sure?")
+                                            .setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialogInterface, int i) {
+                                                    cancelSending();
+                                                }
+                                            })
+                                            .setNegativeButton("no", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialogInterface, int i) {
+                                                    mProgressDialog1.show();
+                                                }
+                                            })
+                                            .create()
+                                            .show();
+                                }
+                            });
+                        } else {
+                            new AlertDialog.Builder(MainActivity.this)
+                                    .setTitle(getString(R.string.sending))
+                                    .setMessage(getString(R.string.successful_send))
+                                    .setPositiveButton(getString(R.string.ok), null)
+                                    .create()
+                                    .show();
+                        }
+                    }
+                } else {
+                    mProgressDialog1.show();
+                }
+
+
+
+                /*if (SendService.service_started) {
                     new AlertDialog.Builder(MainActivity.this)
                             .setTitle(getString(R.string.confirm_resend_title))
                             .setMessage(getString(R.string.confirm_resend_message))
@@ -339,9 +394,24 @@ public class MainActivity extends Activity {
                                     .show();
                         }
                     }
-                }
+                }*/
             }
         });
+    }
+
+    private void cancelSending() {
+        if (SendService.service_started) {
+            Intent mSendIntent = new Intent(MainActivity.this, SendService.class);
+            PendingIntent mPendingIntent = PendingIntent.getService(MainActivity.this, 0,
+                    mSendIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            mAlarmManager.cancel(mPendingIntent);
+            stopService(mSendIntent);
+        }
+
+        if (DeliveryService.service_started) {
+            Intent mDeliveryIntent = new Intent(MainActivity.this, DeliveryService.class);
+            stopService(mDeliveryIntent);
+        }
     }
 
     private int sendSMS() {
@@ -362,18 +432,7 @@ public class MainActivity extends Activity {
             return -2;
         }
 
-        if (SendService.service_started) {
-            Intent mSendIntent = new Intent(MainActivity.this, SendService.class);
-            PendingIntent mPendingIntent = PendingIntent.getService(MainActivity.this, 0,
-                    mSendIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            mAlarmManager.cancel(mPendingIntent);
-            stopService(mSendIntent);
-        }
-
-        if (DeliveryService.service_started) {
-            Intent mDeliveryIntent = new Intent(MainActivity.this, DeliveryService.class);
-            stopService(mDeliveryIntent);
-        }
+        cancelSending();
 
         mAlarmManager = (AlarmManager) MainActivity.this
                 .getSystemService(MainActivity.ALARM_SERVICE);
@@ -395,7 +454,7 @@ public class MainActivity extends Activity {
 
         //使用AlarmManger的setRepeating方法设置定期执行的时间间隔（seconds秒）和需要执行的Service
         mAlarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtTime,
-                600 * 1000, pendingIntent);
+                10 * 1000, pendingIntent);
 
         Intent mDeliveryIntent = new Intent(MainActivity.this, DeliveryService.class);
         mDeliveryIntent.putExtra("send_list_size", ConversationListAdapter.mSendMap.size());

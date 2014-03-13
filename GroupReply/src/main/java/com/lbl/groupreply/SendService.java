@@ -1,5 +1,6 @@
 package com.lbl.groupreply;
 
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentValues;
@@ -36,7 +37,7 @@ public class SendService extends Service {
 
         SmsManager mSmsManager = SmsManager.getDefault();
         //PendingIntent mSendPI = PendingIntent.getActivity(this, 0, new Intent(), 0);
-        for (i = 0; i < 20; i++) {
+        for (i = 0; i < 10; i++) {
             long date = System.currentTimeMillis();
             address = send_list.get(send_count);
 
@@ -78,10 +79,10 @@ public class SendService extends Service {
                 mDeliverIntents.add(mDeliverPI);
             }
 
-            mSmsManager.sendMultipartTextMessage(address, null, messageArray, mSendIntents, mDeliverIntents);
+            //mSmsManager.sendMultipartTextMessage(address, null, messageArray, mSendIntents, mDeliverIntents);
             Log.i("LBL", "Sending " + address);
-
-            if (++send_count == send_list.size()) {
+            MainActivity.mProgressDialog1.setProgress(++send_count);
+            if (send_count == send_list.size()) {
                 PendingIntent pendingIntent = PendingIntent.getService(this, 0,
                         intent, PendingIntent.FLAG_UPDATE_CURRENT);
                 MainActivity.mAlarmManager.cancel(pendingIntent);

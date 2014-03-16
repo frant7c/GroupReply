@@ -55,4 +55,15 @@
         android:layout_alignBottom="@+id/editText2"
         android:layout_toRightOf="@+id/editText2" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="注：一次发送太多短信会被运营商当成垃圾短信屏蔽。例如移动规定1小时只能发送100条短信。"
+        android:id="@+id/textView4"
+        android:layout_below="@+id/textView"
+        android:textColor="#2332ff"
+        android:textSize="15dp"
+        android:layout_alignRight="@+id/textView3"
+        android:layout_alignEnd="@+id/textView3" />
+
 </RelativeLayout>

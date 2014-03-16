@@ -13,9 +13,9 @@
     <string name="ok">确定</string>
     <string name="cancel">取消</string>
     <string name="cancel_send">取消发送</string>
-    <string name="confirm_resend_title">确认重发</string>
-    <string name="confirm_resend_message">程序正在后台发送短信，确认取消并按新的选择发送吗？</string>
-    <string name="send_message">为避免运营商当做垃圾短信屏蔽，我们采取每10分钟发送20条短信的策略。您已选择发送%1$d条短信，预计需要%2$d分钟</string>
+    <string name="confirm_cancel_send_title">确认取消发送</string>
+    <string name="confirm_cancel_send_message">程序正在后台发送短信，确定取消发送吗？</string>
+    <string name="send_message">为避免运营商当做垃圾短信屏蔽，我们采取每5分钟发送10条短信的策略。您已选择发送%1$d条短信，预计需要%2$d分钟</string>
     <string name="title_activity_activity_about">关于</string>
     <string name="input_hint">输入信息</string>
     <string name="successful_send">发送完成</string>

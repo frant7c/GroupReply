@@ -316,8 +316,8 @@ public class MainActivity extends Activity {
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     if (mProgressDialog1.getProgress() < send_map_size) {
                                         new AlertDialog.Builder(MainActivity.this)
-                                                .setTitle(getString(R.string.confirm_resend_title))
-                                                .setMessage(getString(R.string.confirm_resend_message))
+                                                .setTitle(getString(R.string.confirm_cancel_send_title))
+                                                .setMessage(getString(R.string.confirm_cancel_send_message))
                                                 .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
                                                     @Override
                                                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -351,63 +351,6 @@ public class MainActivity extends Activity {
                 } else {
                     mProgressDialog1.show();
                 }
-
-
-
-                /*if (SendService.service_started) {
-                    new AlertDialog.Builder(MainActivity.this)
-                            .setTitle(getString(R.string.confirm_resend_title))
-                            .setMessage(getString(R.string.confirm_resend_message))
-                            .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-
-                                    if (sendSMS() == 0) {
-                                        if (send_map_size > 20) {
-                                            new AlertDialog.Builder(MainActivity.this)
-                                                    .setTitle(getString(R.string.sending))
-                                                    .setMessage(String.format(getString(R.string.send_message),
-                                                            send_map_size,
-                                                            estimate_time))
-                                                    .setPositiveButton(getString(R.string.ok), null)
-                                                    .create()
-                                                    .show();
-                                        } else {
-                                            new AlertDialog.Builder(MainActivity.this)
-                                                    .setTitle(getString(R.string.sending))
-                                                    .setMessage(getString(R.string.successful_send))
-                                                    .setPositiveButton(getString(R.string.ok), null)
-                                                    .create()
-                                                    .show();
-                                        }
-                                    }
-                                }
-                            })
-                            .setNegativeButton(getString(R.string.cancel), null)
-                            .create()
-                            .show();
-                } else {
-
-                    if (sendSMS() == 0) {
-                        if (send_map_size > 20) {
-                            new AlertDialog.Builder(MainActivity.this)
-                                    .setTitle(getString(R.string.sending))
-                                    .setMessage(String.format(getString(R.string.send_message),
-                                            send_map_size,
-                                            estimate_time))
-                                    .setPositiveButton(getString(R.string.ok), null)
-                                    .create()
-                                    .show();
-                        } else {
-                            new AlertDialog.Builder(MainActivity.this)
-                                    .setTitle(getString(R.string.sending))
-                                    .setMessage(getString(R.string.successful_send))
-                                    .setPositiveButton(getString(R.string.ok), null)
-                                    .create()
-                                    .show();
-                        }
-                    }
-                }*/
             }
         });
     }

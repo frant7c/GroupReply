@@ -26,6 +26,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -133,6 +134,8 @@ class ConversationListAdapter extends BaseAdapter {
 public class MainActivity extends Activity {
     public static AlarmManager mAlarmManager;
     public static ProgressDialog mProgressDialog1;
+    public static int sendInterval = 5;
+    public static int sendCount = 10;
     String[] positionArray;
     HashMap<String, Conversation> mConversationsMap;
     Conversation mConversation;
@@ -288,18 +291,24 @@ public class MainActivity extends Activity {
 
                 if (!SendService.service_started) {
                     if (sendSMS() == 0) {
-                        if (send_map_size > 10) {
+                        if (send_map_size > sendCount) {
                             mProgressDialog1 = new ProgressDialog(MainActivity.this);
                             mProgressDialog1.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                             mProgressDialog1.setTitle(getString(R.string.sending));
-                            if ((send_map_size % 10) == 0) {
-                                estimate_time = (send_map_size / 10) * 5;
+                            if ((send_map_size % sendCount) == 0) {
+                                estimate_time = (send_map_size / sendCount) * sendInterval;
                             } else {
-                                estimate_time = (send_map_size / 10) * 5 + 5;
+                                estimate_time = (send_map_size / sendCount) * sendInterval + sendInterval;
                             }
-                            mProgressDialog1.setMessage(String.format(getString(R.string.send_message),
-                                    send_map_size,
-                                    estimate_time));
+                            if ((sendCount == 10) && (sendInterval == 5)) {
+                                mProgressDialog1.setMessage(String.format(getString(R.string.send_message_default),
+                                        send_map_size,
+                                        estimate_time));
+                            } else {
+                                mProgressDialog1.setMessage(String.format(getString(R.string.send_message_custom),
+                                        sendInterval, sendCount, send_map_size, estimate_time));
+                            }
+
                             mProgressDialog1.setIndeterminate(false);
                             mProgressDialog1.setCancelable(false);
                             mProgressDialog1.setMax(send_map_size);
@@ -410,7 +419,7 @@ public class MainActivity extends Activity {
 
         //使用AlarmManger的setRepeating方法设置定期执行的时间间隔（seconds秒）和需要执行的Service
         mAlarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtTime,
-                10 * 1000, pendingIntent);
+                sendInterval * 1000, pendingIntent);
 
         Intent mDeliveryIntent = new Intent(MainActivity.this, DeliveryService.class);
         mDeliveryIntent.putExtra("send_list_size", ConversationListAdapter.mSendMap.size());
@@ -456,9 +465,61 @@ public class MainActivity extends Activity {
         return super.onCreateOptionsMenu(menu);
     }
 
+    private int checkSetting(int interval, int count) {
+        if ((interval < 1) || (interval > 30)) {
+            Toast.makeText(MainActivity.this,
+                    getString(R.string.interval_hint),
+                    Toast.LENGTH_SHORT).show();
+            return -1;
+        }
+
+        if ((count < 1) || (count > 100)) {
+            Toast.makeText(MainActivity.this,
+                    getString(R.string.count_hint),
+                    Toast.LENGTH_SHORT).show();
+            return -1;
+        }
+
+        return 0;
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
+            case R.id.setting:
+                RelativeLayout mSettingLayout = (RelativeLayout)getLayoutInflater()
+                        .inflate(R.layout.view_setting, null);
+
+                final EditText mET1 = (EditText)mSettingLayout.findViewById(R.id.editText);
+                final EditText mET2 = (EditText)mSettingLayout.findViewById(R.id.editText2);
+                mET1.setText(Integer.toString(sendInterval));
+                mET2.setText(Integer.toString(sendCount));
+                final AlertDialog.Builder mBuilder = new AlertDialog.Builder(MainActivity.this);
+                mBuilder.setTitle(getString(R.string.setting));
+                mBuilder.setView(mSettingLayout);
+                mBuilder.create();
+                mBuilder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        if (mET1.getText().toString().equals("") ||
+                                mET2.getText().toString().equals("")) {
+                            Toast.makeText(MainActivity.this,
+                                    getString(R.string.input_error),
+                                    Toast.LENGTH_SHORT).show();
+                        } else {
+                            int interval = Integer.parseInt(mET1.getText().toString());
+                            int count = Integer.parseInt(mET2.getText().toString());
+                            Log.i("LBL", "interval = " + interval + " count = " + count);
+                            if (checkSetting(interval, count) == 0) {
+                                sendInterval = interval;
+                                sendCount = count;
+                            }
+                        }
+
+                    }
+                });
+                mBuilder.show();
+                break;
             case R.id.about:
                 Intent mIntent = new Intent(MainActivity.this, ActivityAbout.class);
                 startActivity(mIntent);

@@ -2,6 +2,7 @@
 <resources>
 
     <string name="app_name">短信群回</string>
+    <string name="setting">设置</string>
     <string name="about">关于</string>
 
     <drawable name="white">#ffffffff</drawable>
@@ -15,9 +16,14 @@
     <string name="cancel_send">取消发送</string>
     <string name="confirm_cancel_send_title">确认取消发送</string>
     <string name="confirm_cancel_send_message">程序正在后台发送短信，确定取消发送吗？</string>
-    <string name="send_message">为避免运营商当做垃圾短信屏蔽，我们采取每5分钟发送10条短信的策略。您已选择发送%1$d条短信，预计需要%2$d分钟</string>
+    <string name="send_message_default">为避免运营商将短信屏蔽，我们默认采取每5分钟发送10条短信的方式。
+        您可以在选项菜单设置发送间隔和每次发送短信数量。您已选择发送%1$d条短信，预计需要%2$d分钟</string>
+    <string name="send_message_custom">每%1$d分钟发送%2$d条短信。您已选择发送%3$d条短信，预计需要%4$d分钟</string>
     <string name="title_activity_activity_about">关于</string>
     <string name="input_hint">输入信息</string>
     <string name="successful_send">发送完成</string>
+    <string name="input_error">输入错误</string>
+    <string name="interval_hint">发送间隔必须为1到30分钟</string>
+    <string name="count_hint">每个间隔最多只能发送100条短信</string>
 
 </resources>

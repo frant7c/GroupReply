@@ -1,6 +1,5 @@
 package com.lbl.groupreply;
 
-import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentValues;
@@ -14,7 +13,8 @@ import java.util.ArrayList;
 
 public class SendService extends Service {
     public static boolean service_started = false;
-    private int send_count = 0;
+    private int send_sum = 0;
+    private int send_cnt;
     public SendService() {
     }
 
@@ -22,6 +22,7 @@ public class SendService extends Service {
     public void onCreate() {
         super.onCreate();
         service_started = true;
+        send_cnt = MainActivity.sendCount;
         Log.i("LBL", "SendService onCreate");
     }
 
@@ -37,9 +38,9 @@ public class SendService extends Service {
 
         SmsManager mSmsManager = SmsManager.getDefault();
         //PendingIntent mSendPI = PendingIntent.getActivity(this, 0, new Intent(), 0);
-        for (i = 0; i < 10; i++) {
+        for (i = 0; i < send_cnt; i++) {
             long date = System.currentTimeMillis();
-            address = send_list.get(send_count);
+            address = send_list.get(send_sum);
 
             //Add sent message into database
             ContentValues values = new ContentValues();
@@ -80,13 +81,16 @@ public class SendService extends Service {
             }
 
             //mSmsManager.sendMultipartTextMessage(address, null, messageArray, mSendIntents, mDeliverIntents);
-            Log.i("LBL", "Sending " + address);
-            send_count++;
+            Log.i("LBL", "Sending " + address + " send_cnt " + send_cnt);
+            send_sum++;
             if (MainActivity.mProgressDialog1 != null) {
-                MainActivity.mProgressDialog1.setProgress(send_count);
+                MainActivity.mProgressDialog1.setProgress(send_sum);
             }
 
-            if (send_count == send_list.size()) {
+            if (send_sum == send_list.size()) {
+                if (MainActivity.mProgressDialog1 != null) {
+                    MainActivity.mProgressDialog1.setMessage(getString(R.string.successful_send));
+                }
                 PendingIntent pendingIntent = PendingIntent.getService(this, 0,
                         intent, PendingIntent.FLAG_UPDATE_CURRENT);
                 MainActivity.mAlarmManager.cancel(pendingIntent);

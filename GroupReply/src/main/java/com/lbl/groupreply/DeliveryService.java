@@ -15,6 +15,7 @@ import android.util.Log;
 public class DeliveryService extends Service {
     public static boolean service_started = false;
     int receiveCount = 0;
+    int sendListSize;
     private BroadcastReceiver mSendBroadcastReceiver;
     private BroadcastReceiver mDeliveryBroadcastReceiver;
 
@@ -25,14 +26,14 @@ public class DeliveryService extends Service {
     public void onCreate() {
         super.onCreate();
         service_started = true;
+
         Log.i("LBL", "DeliveryService onCreate");
     }
 
     @Override
     public int onStartCommand(android.content.Intent intent, int flags, int startId) {
         Log.i("LBL", "DeliveryService onStartCommand");
-        final int sendListSize = intent.getIntExtra("send_list_size", 0);
-
+        sendListSize = intent.getIntExtra("send_list_size", 0);
         mSendBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -45,6 +46,7 @@ public class DeliveryService extends Service {
                     case SmsManager.RESULT_ERROR_NULL_PDU:
                     case SmsManager.RESULT_ERROR_RADIO_OFF:
                         Log.i("LBL", "RESULT_ERROR_NO_SERVICE");
+                        sendListSize--;
                         String address = intent.getStringExtra("address");
                         String sms = intent.getStringExtra("body");
                         long date = intent.getLongExtra("date", 0);
@@ -60,10 +62,6 @@ public class DeliveryService extends Service {
                         values.put("body", sms);
                         getContentResolver().insert(Uri.parse("content://sms/failed"), values);
                         break;
-                }
-                receiveCount++;
-                if (receiveCount >= sendListSize) {
-                    stopSelf();
                 }
             }
         };

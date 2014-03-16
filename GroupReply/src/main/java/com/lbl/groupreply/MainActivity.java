@@ -112,11 +112,11 @@ class ConversationListAdapter extends BaseAdapter {
                     if (isChecked) {
                         mHolder.mCheck.setChecked(true);
                         mSendMap.put(mConversation.address, false);
-                        Log.i("LBL", position + " has been checked!");
+                        //Log.i("LBL", position + " has been checked!");
                     } else {
                         mSendMap.remove(mConversation.address);
                         mHolder.mCheck.setChecked(false);
-                        Log.i("LBL", position + " has been unchecked!");
+                        //Log.i("LBL", position + " has been unchecked!");
                     }
                 }
 
@@ -260,11 +260,11 @@ public class MainActivity extends Activity {
         mConversationListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Log.i("LBL", i + " has been selected!");
+                //Log.i("LBL", i + " has been selected!");
                 Conversation mConversation = mConversationsMap.get(positionArray[i]);
                 Intent mIntent = new Intent(MainActivity.this, ConversationActivity.class);
                 Bundle mData = new Bundle();
-                mData.putSerializable("smslist", mConversation.smsArrayList);
+                mData.putSerializable("sms_list", mConversation.smsArrayList);
                 mIntent.putExtras(mData);
                 startActivity(mIntent);
             }
@@ -419,7 +419,7 @@ public class MainActivity extends Activity {
 
         //使用AlarmManger的setRepeating方法设置定期执行的时间间隔（seconds秒）和需要执行的Service
         mAlarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtTime,
-                sendInterval * 1000, pendingIntent);
+                sendInterval * 60000, pendingIntent);
 
         Intent mDeliveryIntent = new Intent(MainActivity.this, DeliveryService.class);
         mDeliveryIntent.putExtra("send_list_size", ConversationListAdapter.mSendMap.size());
@@ -509,7 +509,7 @@ public class MainActivity extends Activity {
                         } else {
                             int interval = Integer.parseInt(mET1.getText().toString());
                             int count = Integer.parseInt(mET2.getText().toString());
-                            Log.i("LBL", "interval = " + interval + " count = " + count);
+                            //Log.i("LBL", "interval = " + interval + " count = " + count);
                             if (checkSetting(interval, count) == 0) {
                                 sendInterval = interval;
                                 sendCount = count;

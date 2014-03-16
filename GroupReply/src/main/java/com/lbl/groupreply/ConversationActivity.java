@@ -82,7 +82,7 @@ public class ConversationActivity extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent mIntent = getIntent();
-        ArrayList<SMS> mSMSList = (ArrayList<SMS>) mIntent.getSerializableExtra("smslist");
+        ArrayList<SMS> mSMSList = (ArrayList<SMS>) mIntent.getSerializableExtra("sms_list");
         SMSListAdapter mSMSListAdapter = new SMSListAdapter(this, mSMSList);
         setListAdapter(mSMSListAdapter);
     }

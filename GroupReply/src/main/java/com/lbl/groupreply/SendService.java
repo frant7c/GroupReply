@@ -37,7 +37,6 @@ public class SendService extends Service {
         String sms = intent.getStringExtra("sms");
 
         SmsManager mSmsManager = SmsManager.getDefault();
-        //PendingIntent mSendPI = PendingIntent.getActivity(this, 0, new Intent(), 0);
         for (i = 0; i < send_cnt; i++) {
             long date = System.currentTimeMillis();
             address = send_list.get(send_sum);
@@ -62,7 +61,7 @@ public class SendService extends Service {
                 mSendIntent.putExtra("date", date);
                 mSendIntent.putExtra("body", sms);
                 mSendIntent.putExtra("uri", uri.toString());
-                PendingIntent mSendPI = PendingIntent.getBroadcast(this, 0,
+                PendingIntent mSendPI = PendingIntent.getBroadcast(this, send_sum,
                         mSendIntent, PendingIntent.FLAG_CANCEL_CURRENT);
                 mSendIntents.add(mSendPI);
             }
@@ -75,13 +74,14 @@ public class SendService extends Service {
                 mDeliverIntent.putExtra("date", date);
                 mDeliverIntent.putExtra("body", sms);
                 mDeliverIntent.putExtra("uri", uri.toString());
-                PendingIntent mDeliverPI = PendingIntent.getBroadcast(this, 0,
+                PendingIntent mDeliverPI = PendingIntent.getBroadcast(this, send_sum,
                         mDeliverIntent, PendingIntent.FLAG_CANCEL_CURRENT);
                 mDeliverIntents.add(mDeliverPI);
             }
 
-            //mSmsManager.sendMultipartTextMessage(address, null, messageArray, mSendIntents, mDeliverIntents);
-            Log.i("LBL", "Sending " + address + " send_cnt " + send_cnt);
+            mSmsManager.sendMultipartTextMessage(address, null, messageArray, mSendIntents, mDeliverIntents);
+            Log.i("LBL", "Sending " + address + " send_cnt " + send_cnt + " size " + size);
+
             send_sum++;
             if (MainActivity.mProgressDialog1 != null) {
                 MainActivity.mProgressDialog1.setProgress(send_sum);

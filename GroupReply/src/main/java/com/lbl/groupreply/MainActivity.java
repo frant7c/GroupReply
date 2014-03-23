@@ -157,15 +157,15 @@ public class MainActivity extends Activity {
             dumpNumber();
             try {
                 if(cursor.moveToFirst()) {
-                    //int index_Address = cursor.getColumnIndex("address");
-                    int index_Address = 0;
+                    int index_Address = cursor.getColumnIndex("address");
+                    //int index_Address = 0;
                     //int index_Person = cursor.getColumnIndex("person");
-                    //int index_Body = cursor.getColumnIndex("body");
-                    int index_Body = 1;
-                    //int index_type = cursor.getColumnIndex("type");
-                    int index_type = 3;
-                    //int index_Date = cursor.getColumnIndex("date");
-                    int index_Date = 2;
+                    int index_Body = cursor.getColumnIndex("body");
+                    //int index_Body = 1;
+                    int index_type = cursor.getColumnIndex("type");
+                    //int index_type = 3;
+                    int index_Date = cursor.getColumnIndex("date");
+                    //int index_Date = 2;
                     //Log.i("LBL", "" + index_Date);
                     do{
                         String address = handleNumber(cursor.getString(index_Address));
